@@ -20,6 +20,7 @@ if not path.endswith('/'):
 
 myfiles = []
 totalfiles  = 0
+totalfileswithexif = 0
 
 etotalheight = 0
 etotalwidth  = 0
@@ -41,19 +42,23 @@ for root, dirs, files in os.walk(path):
 with exiftool.ExifTool() as et:
     metadata = et.get_metadata_batch(myfiles)
 for d in metadata:
+    #print d
     totalfiles  += 1
-    eheight = d["EXIF:ImageHeight"]
-    ewidth  = d["EXIF:ImageWidth"]
+
+    if 'EXIF:ImageHeight' in d:  # check to make sure there is exif data before calling it
+        totalfileswithexif += 1
+        eheight = d["EXIF:ImageHeight"]
+        ewidth  = d["EXIF:ImageWidth"]
+
+        if elargestheight < eheight:
+            elargestheight = eheight
+        if elargestwidth < ewidth:
+            elargestwidth = ewidth
+        etotalheight += eheight
+        etotalwidth  += ewidth
 
     fheight = d["File:ImageHeight"]
     fwidth  = d["File:ImageWidth"]
-
-    if elargestheight < eheight:
-        elargestheight = eheight
-    if elargestwidth < ewidth:
-        elargestwidth = ewidth
-    etotalheight += eheight
-    etotalwidth  += ewidth
 
     if flargestheight < fheight:
         flargestheight = fheight
@@ -67,14 +72,21 @@ for d in metadata:
     #print d["File:ImageHeight"]
     #print d["File:ImageWidth"]
 
+print
 print "TOTAL FILES   : " , totalfiles
-print "EXIF AVERAGE HEIGHT: " , etotalheight / totalfiles
-print "EXIF AVERAGE WIDTH : " , etotalwidth / totalfiles
-# checking and printing this just to make sure there aren't any oddball outlyers
-print "ExifLargestHeight: ", elargestheight , " ExifLargestWidth: ", elargestwidth
+print
+if totalfileswithexif > 0:
+    print "TOTAL FILES that had EXIF DATA : ", totalfileswithexif
+    print "EXIF AVERAGE HEIGHT: " , etotalheight / totalfileswithexif
+    print "EXIF AVERAGE WIDTH : " , etotalwidth / totalfileswithexif
+    # checking and printing this just to make sure there aren't any oddball outlyers
+    print "ExifLargestHeight: ", elargestheight , " ExifLargestWidth: ", elargestwidth
+print
 print "File AVERAGE HEIGHT: " , ftotalheight / totalfiles
 print "File AVERAGE WIDTH : " , ftotalwidth / totalfiles
 # checking and printing this just to make sure there aren't any oddball outlyers
 print "FileLargestHeight: ", flargestheight , " FileLargestWidth: ", flargestwidth
-if (ftotalwidth != etotalwidth or ftotalheight != etotalheight):
-        print "FILE AND EXIF DATA DIFFER!!!!!!!!!"
+if totalfileswithexif == totalfiles:  # all files had both size and exif data
+        if (ftotalwidth != etotalwidth or ftotalheight != etotalheight):
+                print "FILE AND EXIF DATA DIFFER!!!!!!!!!"
+print
