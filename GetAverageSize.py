@@ -35,6 +35,7 @@ flargestheight = 0
 #myfiles = ["./testimages/BlainDiary_020.jpg", "./testimages/BlainDiary_022.jpg", "./testimages/BlainDiary_024.jpg"]
 
 for root, dirs, files in os.walk(path):
+    files = [f for f in files if not f[0] == '.']  # remove hiddin . files
     for name in files:
         #print root, name
         myfiles.append(root + name)
