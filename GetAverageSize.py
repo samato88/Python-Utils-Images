@@ -21,16 +21,24 @@ if not path.endswith('/'):
 myfiles = []
 totalfiles  = 0
 totalfileswithexif = 0
+totalfileswithxmp = 0
+totalfileswithfile = 0
+
 
 etotalheight = 0
 etotalwidth  = 0
-elargestwidth = 0
 elargestheight = 0
+elargestwidth = 0
+
+xtotalheight = 0
+xtotalwidth  = 0
+xlargestheight = 0
+xlargestwidth = 0
 
 ftotalheight = 0
 ftotalwidth  = 0
-flargestwidth = 0
 flargestheight = 0
+flargestwidth = 0
 
 #myfiles = ["./testimages/BlainDiary_020.jpg", "./testimages/BlainDiary_022.jpg", "./testimages/BlainDiary_024.jpg"]
 
@@ -58,20 +66,39 @@ for d in metadata:
         etotalheight += eheight
         etotalwidth  += ewidth
 
-    fheight = d["File:ImageHeight"]
-    fwidth  = d["File:ImageWidth"]
+    if 'XMP:ImageHeight' in d:  # check to make sure there is xmp data before calling it
+        totalfileswithxmp += 1
+        xheight = d["XMP:ImageHeight"]
+        xwidth  = d["XMP:ImageWidth"]
 
-    if flargestheight < fheight:
-        flargestheight = fheight
-    if flargestwidth < fwidth:
-        flargestwidth = fwidth
-    ftotalheight += fheight
-    ftotalwidth  += fwidth
+        if xlargestheight < xheight:
+            xlargestheight = xheight
+        if xlargestwidth < xwidth:
+            xlargestwidth = xwidth
+        xtotalheight += xheight
+        xtotalwidth  += xwidth
+
+
+    if 'File:ImageHeight' in d:  # check to make sure there is xmp data before calling it
+        totalfileswithfile += 1
+
+        fheight = d["File:ImageHeight"]
+        fwidth  = d["File:ImageWidth"]
+
+        if flargestheight < fheight:
+            flargestheight = fheight
+        if flargestwidth < fwidth:
+            flargestwidth = fwidth
+        ftotalheight += fheight
+        ftotalwidth  += fwidth
 
     #print d["EXIF:ImageHeight"]
     #print d["EXIF:ImageWidth"]
     #print d["File:ImageHeight"]
     #print d["File:ImageWidth"]
+    #print d["XMP:ImageHeight"]
+    #print d["XMP:ImageWidth"]
+
 
 print
 print "TOTAL FILES   : " , totalfiles
@@ -83,10 +110,18 @@ if totalfileswithexif > 0:
     # checking and printing this just to make sure there aren't any oddball outlyers
     print "ExifLargestHeight: ", elargestheight , " ExifLargestWidth: ", elargestwidth
 print
-print "File AVERAGE HEIGHT: " , ftotalheight / totalfiles
-print "File AVERAGE WIDTH : " , ftotalwidth / totalfiles
-# checking and printing this just to make sure there aren't any oddball outlyers
-print "FileLargestHeight: ", flargestheight , " FileLargestWidth: ", flargestwidth
+if totalfileswithxmp> 0:
+    print "TOTAL FILES that had XMP DATA : ", totalfileswithxmp
+    print "XMP AVERAGE HEIGHT: " , xtotalheight / totalfileswithxmp
+    print "XMP AVERAGE WIDTH : " , xtotalwidth / totalfileswithxmp
+    # checking and printing this just to make sure there aren't any oddball outlyers
+    print "XMPLargestHeight: ", xlargestheight , " XMPLargestWidth: ", xlargestwidth
+print
+if totalfileswithfile> 0:
+    print "File AVERAGE HEIGHT: " , ftotalheight / totalfiles
+    print "File AVERAGE WIDTH : " , ftotalwidth / totalfiles
+    # checking and printing this just to make sure there aren't any oddball outlyers
+    print "FileLargestHeight: ", flargestheight , " FileLargestWidth: ", flargestwidth
 if totalfileswithexif == totalfiles:  # all files had both size and exif data
         if (ftotalwidth != etotalwidth or ftotalheight != etotalheight):
                 print "FILE AND EXIF DATA DIFFER!!!!!!!!!"
